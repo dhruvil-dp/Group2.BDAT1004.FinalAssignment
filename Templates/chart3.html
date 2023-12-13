@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="mb-3 text-center">
+                <label class="form-label">Stacked Bar Chart of Total Exports Value by Year and Category</label>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div id="chart-container" style="width: 100%; height: 715px; margin: auto;">
+                <canvas id="stackedBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/getchartdata/3')
+            .then(response => response.json())
+            .then(data => {
+                const categories = Object.keys(data);
+                const values = Object.values(data);
+
+                var ctx = document.getElementById('stackedBarChart').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
+                        datasets: categories.map((category, index) => {
+                            return {
+                                label: category,
+                                data: values[index],
+                                backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`
+                            };
+                        })
+                    },
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Stacked Bar Chart of Total Exports Value by Year and Category`,
+                                position: 'top'
+                            },
+                            legend: {
+                                display: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                title: {
+                                    display: true,
+                                    text: 'Years'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                title: {
+                                    display: true,
+                                    text: 'Total Value in Millions'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
+</script>
+
+{% endblock %}

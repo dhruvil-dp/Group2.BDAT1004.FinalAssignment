@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="mb-3 text-center">
+                <label class="form-label">Year-wise Exports and Imports Values</label>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div id="chart-container" style="width: 100%; height: 715px; margin: auto;">
+                <canvas id="horizontalBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function fetchLineChartData() {
+            fetch('/getchartdata/5')
+                .then(response => response.json())
+                .then(data => {
+                    const labels = data.labels;
+                    const values = data.values;
+                    drawLineChart(labels, values);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        function drawLineChart(labels, values) {
+            var ctx = document.getElementById('horizontalBarChart').getContext('2d');
+            var borderColors = ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'];
+            var dataset = [];
+            for (let i = 0; i < values.length; i++) {
+                if (i === 0) {
+                    var label = 'Imports';
+                } else {
+                    var label = 'Exports';
+                }
+                dataset.push({
+                    label: label,
+                    data: values[i],
+                    borderColor: borderColors[i],
+                    borderWidth: 2,
+                    fill: false
+                });
+            }
+            const data = {
+                labels: labels,
+                datasets: dataset
+            };
+
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Total Value in Million'
+                            }
+                        }
+                    },
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: `Year-wise Exports and Imports Values`,
+                        }
+                    }
+                }
+            };
+
+            new Chart(ctx, config); // Creating a new Chart instance
+        }
+
+        fetchLineChartData();
+    });
+</script>
+
+{% endblock %}

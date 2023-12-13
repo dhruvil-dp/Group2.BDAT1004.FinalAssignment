@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="mb-3 text-center">
+                <label class="form-label">Import and Export Values by Category</label>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div id="chart-container" style="width: 100%; height: 715px; margin: auto;">
+                <canvas id="stackedBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/getchartdata/4')
+            .then(response => response.json())
+            .then(data => {
+                const type = Object.keys(data);
+                const values = Object.values(data);
+                values.splice(2);
+                type.splice(2);
+
+                var ctx = document.getElementById('stackedBarChart').getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data['categories'],
+                        datasets: type.map((t, index) => {
+                            return {
+                                label: t,
+                                data: values[index],
+                                backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`
+                            };
+                        })
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Categories'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Total Value'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Import and Export Values by Category`,
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-size: 50%;
+    }
+</style>
+
+<div class="intro col-md-6 offset-md-3 text-center ">
+    <img src="{{ url_for('static', filename='graph.gif') }}" alt="Graph GIF" class="mx-auto img-fluid">
+    <h1>Welcome to the Home Page</h1>
+</div>
+
+
+<style>
+    .intro {
+        position: relative;
+        height: 100vh;
+    }
+
+    .intro h1 {
+        position: absolute;
+        bottom: 30%;
+        width: 100%;
+    }
+</style>
+
+{% endblock %}

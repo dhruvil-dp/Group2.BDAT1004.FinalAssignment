@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="mb-3 text-center">
+                <label class="form-label">Select a Trade Type</label>
+                <div class="toggle-container center" onclick="toggleChart()">
+                    <div class="toggle-label-left">Export</div>
+                    <div class="toggle bg-dark" id="toggleButton">
+                        <div class="toggle-handle"></div>
+                    </div>
+                    <div class="toggle-label-right">Import</div>
+                </div>
+                
+                
+            </div>
+        </div>
+        <div class="row justify-content-center align-items-center" id="chart-container" style="width: 700px; height: 700px;">
+            <canvas id="new-chart-canvas" style="margin: auto;"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // JavaScript code to generate charts using Chart.js
+    function drawChart(labels, values, canvasId, tradeType) {
+        var pieChartColors = [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(0, 128, 0, 0.8)',   
+        'rgba(255, 0, 255, 0.8)'  
+        ];
+        var ctx = document.getElementById(canvasId).getContext('2d');
+        var data = {
+            labels: labels,
+            datasets: [{
+                label: 'Trade Data',
+                data: values,
+                backgroundColor: pieChartColors,
+                borderColor: 'grey',
+                borderWidth: 1
+            }]
+        };
+
+        var config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Total ${tradeType} by country`,
+                    }
+                }
+            }
+        };
+
+        return new Chart(ctx, config);
+    }
+
+    // Fetch and draw the charts using AJAX
+    document.addEventListener('DOMContentLoaded', function () {
+        var chartContainer = document.getElementById('chart-container');
+        var canvasId = 'new-chart-canvas';
+        var currentChart;
+
+        fetch('/getchartdata/1')
+            .then(response => response.json())
+            .then(data => {
+                var importLabels = data.import_labels;
+                var importValues = data.import_values;
+                var exportLabels = data.export_labels;
+                var exportValues = data.export_values;
+
+                function drawSelectedChart(labels, values, tradeType) {
+                    if (currentChart) {
+                        // Update the existing chart
+                        currentChart.data.labels = labels;
+                        currentChart.data.datasets[0].data = values;
+                        currentChart.options.plugins.title.text = `Total ${tradeType} by country`;
+                        currentChart.update();
+                    } else {
+                        // Create a new chart
+                        currentChart = drawChart(labels, values, canvasId, tradeType);
+                    }
+                }
+
+                // Initial draw with Export data
+                drawSelectedChart(exportLabels, exportValues, 'Export');
+
+                document.getElementById('toggleButton').addEventListener('click', function () {
+                    var toggle = document.getElementById('toggleButton');
+                    toggle.classList.toggle('active');
+                    drawSelectedChart(toggle.classList.contains('active') ? importLabels : exportLabels, toggle.classList.contains('active') ? importValues : exportValues, toggle.classList.contains('active') ? 'Import' : 'Export');
+                });
+            });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Center items horizontally */
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+
+    .toggle {
+        width: 40px;
+        height: 20px;
+        max-width: 40px;
+        background-color: #ccc;
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+        margin-left: 10px; /* Add margin-left for spacing */
+    }
+
+    .toggle-handle {
+        width: 20px;
+        height: 20px;
+        background-color: cyan;
+        border-radius: 50%;
+        position: absolute;
+        transition: left 0.3s;
+    }
+
+    .toggle-label-left {
+        
+        margin-right: 5px;
+        user-select: none;
+    }
+
+    .toggle-label-right {
+        margin-left: 10px;
+        user-select: none;
+    }
+
+    .toggle.active .toggle-handle {
+        left: 20px;
+    }
+</style>
+
+
+
+
+
+
+{% endblock %}
